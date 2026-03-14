@@ -1,0 +1,1 @@
+{"message":"Validation error","invalid_params":[{"field":"body.aspect_ratio","reason":"Input should be 'square_1_1', 'classic_4_3', 'traditional_3_4', 'widescreen_16_9', 'social_story_9_16', 'standard_3_2', 'portrait_2_3', 'horizontal_2_1', 'vertical_1_2' or 'social_post_4_5'"}]}

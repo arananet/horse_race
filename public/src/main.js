@@ -16,19 +16,20 @@ const input = new InputHandler(canvas);
 const background = new Background(canvas.width, canvas.height);
 let horse = new Horse(canvas.width, canvas.height);
 
-// State Machine: MENU, PLAYING, PAUSED, GAMEOVER, HIGHSCORES
 let currentState = 'MENU';
-let menuSelection = 0; // 0 = Start, 1 = High Scores
+let menuSelection = 0; 
+let highScores = JSON.parse(localStorage.getItem('roachRaceHighScores')) || [];
 
 let gameSpeed = 6;
 let score = 0;
 let apples = 0;
+let distance = 0; // Added pure distance tracker
 
 let obstacles = [];
 let collectibles = [];
 let obstacleTimer = 0;
 let collectibleTimer = 0;
-let obstacleInterval = 2000;
+let obstacleInterval = 1500;
 
 function resetGame() {
     horse = new Horse(canvas.width, canvas.height);
@@ -36,14 +37,23 @@ function resetGame() {
     collectibles = [];
     score = 0;
     apples = 0;
-    gameSpeed = 6;
-    obstacleInterval = 2000;
+    distance = 0;
+    gameSpeed = 5; // Start a bit slower
+    obstacleInterval = 1500;
     currentState = 'PLAYING';
+}
+
+function saveHighScore() {
+    const finalScore = Math.floor(score);
+    highScores.push(finalScore);
+    highScores.sort((a, b) => b - a);
+    highScores = highScores.slice(0, 5); // Keep top 5
+    localStorage.setItem('roachRaceHighScores', JSON.stringify(highScores));
 }
 
 function update(dt) {
     if (currentState === 'MENU') {
-        background.update(2.0); // Scroll background slowly on menu
+        background.update(1.0); 
         
         if (input.consumeUp() || input.consumeDown()) {
             menuSelection = menuSelection === 0 ? 1 : 0;
@@ -54,7 +64,6 @@ function update(dt) {
             if (menuSelection === 1) currentState = 'HIGHSCORES';
         }
         
-        // Mouse/Touch controls for Menu
         const startBtn = { x: 300, y: 220, w: 200, h: 40 };
         const scoreBtn = { x: 300, y: 270, w: 200, h: 40 };
         
@@ -68,7 +77,7 @@ function update(dt) {
     }
 
     if (currentState === 'HIGHSCORES') {
-        background.update(1.0);
+        background.update(0.5);
         if (input.consumeEnter() || input.consumeJump()) {
             currentState = 'MENU';
         }
@@ -96,19 +105,21 @@ function update(dt) {
         background.update(gameSpeed);
         horse.update(input);
         
-        // Spawn Obstacles
         obstacleTimer += dt;
         if (obstacleTimer > obstacleInterval) {
-            const type = Math.random() > 0.8 ? 'bird' : 'fence';
+            // Determine obstacle type based on distance (harder later)
+            let type = 'fence';
+            if (distance > 1000 && Math.random() > 0.6) {
+                type = 'bird';
+            }
             obstacles.push(new Obstacle(canvas.width, canvas.height, gameSpeed, type));
             obstacleTimer = 0;
-            if (obstacleInterval > 800) obstacleInterval -= 20;
+            if (obstacleInterval > 700) obstacleInterval -= 15;
         }
 
-        // Spawn Collectibles
         collectibleTimer += dt;
-        if (collectibleTimer > 3000) {
-            if (Math.random() > 0.5) {
+        if (collectibleTimer > 2000) {
+            if (Math.random() > 0.4) {
                 collectibles.push(new Collectible(canvas.width, canvas.height));
             }
             collectibleTimer = 0;
@@ -118,11 +129,12 @@ function update(dt) {
             let o = obstacles[i];
             o.update(gameSpeed);
             
-            const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 20 };
-            const obsHitBox = { x: o.x + 5, y: o.y + 5, width: o.width - 10, height: o.height - 10 };
+            // Forgiving Hitbox
+            const horseHitBox = { x: horse.x + 15, y: horse.y + 15, width: horse.width - 30, height: horse.height - 30 };
+            const obsHitBox = { x: o.x + 10, y: o.y + 10, width: o.width - 20, height: o.height - 20 };
             
             if (checkCollision(horseHitBox, obsHitBox)) {
-                // Save High Score logic could go here
+                saveHighScore();
                 currentState = 'GAMEOVER';
             }
 
@@ -135,59 +147,54 @@ function update(dt) {
             
             if (checkCollision(horse, c)) {
                 c.markedForDeletion = true;
-                score += 100;
+                score += 50; // Apple bonus
                 apples++;
             }
 
             if (c.markedForDeletion) collectibles.splice(i, 1);
         }
         
+        distance += gameSpeed * 0.1;
         score += gameSpeed * 0.05;
-        gameSpeed += 0.001; 
+        gameSpeed += 0.0005; // Gradual speed increase
     }
 }
 
 function drawMenu() {
     ctx.textAlign = 'center';
-    
-    // Draw Title (Roach Race Style)
-    ctx.fillStyle = '#ff4500'; // Orange/Red
-    ctx.font = 'bold 60px "Courier New"';
-    ctx.lineWidth = 4;
+    ctx.fillStyle = '#ff4500';
+    ctx.font = 'bold 70px "Courier New"';
+    ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText('ROACH RACE', canvas.width / 2, 120);
-    ctx.fillText('ROACH RACE', canvas.width / 2, 120);
+    ctx.strokeText('ROACH RACE', canvas.width / 2, 140);
+    ctx.fillText('ROACH RACE', canvas.width / 2, 140);
     
-    // Blue sub-shadow for retro 3D feel
     ctx.fillStyle = '#000080';
-    ctx.fillText('ROACH RACE', canvas.width / 2 + 4, 124);
+    ctx.fillText('ROACH RACE', canvas.width / 2 + 5, 145);
     
-    // Menu Options
     ctx.font = 'bold 30px "Courier New"';
+    ctx.lineWidth = 3;
     
-    const startColor = menuSelection === 0 ? 'white' : '#aaaaaa';
-    const scoreColor = menuSelection === 1 ? 'white' : '#aaaaaa';
+    const startColor = menuSelection === 0 ? 'white' : '#888';
+    const scoreColor = menuSelection === 1 ? 'white' : '#888';
     
     ctx.fillStyle = startColor;
     ctx.strokeStyle = 'black';
-    ctx.lineWidth = 4;
-    ctx.strokeText('START GAME', canvas.width / 2, 250);
-    ctx.fillText('START GAME', canvas.width / 2, 250);
+    ctx.strokeText('START GAME', canvas.width / 2, 260);
+    ctx.fillText('START GAME', canvas.width / 2, 260);
     
-    // Draw cursor carrot for Start
     if (menuSelection === 0) {
-        ctx.fillStyle = 'orange';
-        ctx.fillText('🥕', canvas.width / 2 - 120, 250);
+        ctx.fillStyle = '#ff4500';
+        ctx.fillText('►', canvas.width / 2 - 120, 260);
     }
     
     ctx.fillStyle = scoreColor;
-    ctx.strokeText('HIGH SCORES', canvas.width / 2, 300);
-    ctx.fillText('HIGH SCORES', canvas.width / 2, 300);
+    ctx.strokeText('HIGH SCORES', canvas.width / 2, 320);
+    ctx.fillText('HIGH SCORES', canvas.width / 2, 320);
     
-    // Draw cursor carrot for Scores
     if (menuSelection === 1) {
-        ctx.fillStyle = 'orange';
-        ctx.fillText('🥕', canvas.width / 2 - 130, 300);
+        ctx.fillStyle = '#ff4500';
+        ctx.fillText('►', canvas.width / 2 - 130, 320);
     }
 }
 
@@ -197,27 +204,33 @@ function draw() {
     
     if (currentState === 'MENU') {
         drawMenu();
-        // Draw a decorative horse on the menu
+        // Draw the horse standing idly
         horse.draw(ctx);
         return;
     }
 
     if (currentState === 'HIGHSCORES') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(100, 50, canvas.width - 200, canvas.height - 100);
         
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = '#ff4500';
         ctx.textAlign = 'center';
         ctx.font = 'bold 40px "Courier New"';
-        ctx.fillText('HIGH SCORES', canvas.width / 2, 110);
+        ctx.fillText('TOP JOCKEYS', canvas.width / 2, 110);
         
-        ctx.font = '20px "Courier New"';
-        ctx.fillText('1. 00000', canvas.width / 2, 170);
-        ctx.fillText('2. 00000', canvas.width / 2, 210);
-        ctx.fillText('3. 00000', canvas.width / 2, 250);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 24px "Courier New"';
+        if (highScores.length === 0) {
+            ctx.fillText('No scores yet.', canvas.width / 2, 180);
+        } else {
+            highScores.forEach((s, idx) => {
+                ctx.fillText(`${idx + 1}. ${s.toString().padStart(5, '0')}`, canvas.width / 2, 170 + (idx * 35));
+            });
+        }
         
-        ctx.fillStyle = 'orange';
-        ctx.fillText('Press SPACE to return', canvas.width / 2, 320);
+        ctx.fillStyle = '#aaaaaa';
+        ctx.font = '16px "Courier New"';
+        ctx.fillText('Tap or Space to return', canvas.width / 2, 330);
         return;
     }
 
@@ -226,41 +239,57 @@ function draw() {
     obstacles.forEach(o => o.draw(ctx));
     horse.draw(ctx);
     
+    // UI Overlay
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 20px "Courier New"';
-    ctx.textAlign = 'right';
-    ctx.fillText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 30);
-    ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 60);
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 3;
+    ctx.font = 'bold 24px "Courier New"';
     
+    ctx.textAlign = 'right';
+    ctx.strokeText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 40);
+    ctx.fillText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 40);
+    
+    ctx.fillStyle = '#32CD32'; // Apple Green
+    ctx.strokeText(`APPLES: ${apples}`, canvas.width - 20, 70);
+    ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 70);
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.textAlign = 'left';
-    ctx.font = '14px "Courier New"';
-    ctx.fillText('TAP/SPACE: Double Jump', 20, canvas.height - 10);
+    ctx.font = 'bold 16px "Courier New"';
+    ctx.fillText('TAP/SPACE: Jump | P: Pause', 20, canvas.height - 20);
     
     if (currentState === 'PAUSED') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 40px "Courier New"';
+        ctx.font = 'bold 50px "Courier New"';
         ctx.textAlign = 'center';
         ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
     }
 
     if (currentState === 'GAMEOVER') {
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.fillStyle = 'rgba(139, 0, 0, 0.7)'; // Dark red tint
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 4;
         ctx.textAlign = 'center';
-        ctx.font = 'bold 50px "Courier New"';
-        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 20);
         
-        ctx.font = 'bold 20px "Courier New"';
-        ctx.fillText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 20);
-        ctx.font = '16px "Courier New"';
-        ctx.fillText('Tap or Space to Menu', canvas.width / 2, canvas.height / 2 + 60);
+        ctx.font = 'bold 60px "Courier New"';
+        ctx.strokeText('WASTED', canvas.width / 2, canvas.height / 2 - 30);
+        ctx.fillText('WASTED', canvas.width / 2, canvas.height / 2 - 30);
+        
+        ctx.font = 'bold 30px "Courier New"';
+        ctx.strokeText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 30);
+        ctx.fillText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 30);
+        
+        ctx.fillStyle = '#aaaaaa';
+        ctx.font = 'bold 18px "Courier New"';
+        ctx.fillText('Tap or Space to Menu', canvas.width / 2, canvas.height / 2 + 80);
     }
 }
 
 const engine = new Engine(update, draw);
 engine.start();
-console.log("Horse Race Engine Started (60fps Target).");
+console.log("Horse Race Engine Started.");
