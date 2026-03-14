@@ -3,9 +3,9 @@ export class Horse {
         this.gameWidth = gameWidth;
         this.gameHeight = gameHeight;
         
-        // Sizing
-        this.width = 60;
-        this.height = 60;
+        // Sizing for AABB Collision Box
+        this.width = 50;
+        this.height = 50;
         
         // Position
         this.x = 100; // Fixed x position for endless runner
@@ -36,10 +36,8 @@ export class Horse {
         
         // Collision with ground
         if (this.y < this.groundY) {
-            // Still in the air
             this.vy += this.gravity;
         } else {
-            // Landed
             this.y = this.groundY;
             this.vy = 0;
             this.jumps = 0; // Reset jumps
@@ -52,15 +50,15 @@ export class Horse {
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         // Head/Neck
-        ctx.fillRect(this.x + this.width - 10, this.y - 20, 30, 30);
+        ctx.fillRect(this.x + this.width - 10, this.y - 15, 20, 20);
         
         // Eye
         ctx.fillStyle = 'black';
-        ctx.fillRect(this.x + this.width + 10, this.y - 15, 5, 5);
+        ctx.fillRect(this.x + this.width, this.y - 10, 4, 4);
 
         // Legs (Running animation placeholder)
         ctx.fillStyle = '#5C4033'; // DarkBrown
-        ctx.fillRect(this.x + 10, this.y + this.height, 10, 20); // Back leg
-        ctx.fillRect(this.x + this.width - 20, this.y + this.height, 10, 20); // Front leg
+        ctx.fillRect(this.x + 10, this.y + this.height, 8, 15); // Back leg
+        ctx.fillRect(this.x + this.width - 15, this.y + this.height, 8, 15); // Front leg
     }
 }
