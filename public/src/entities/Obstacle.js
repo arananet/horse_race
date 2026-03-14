@@ -6,13 +6,22 @@ export class Obstacle {
         
         // Define sizes based on type
         if (type === 'fence') {
-            this.width = 30;
-            this.height = 50;
-            this.y = gameHeight - 40 - this.height; // Floor level
-        } else if (type === 'bird') {
             this.width = 40;
-            this.height = 30;
+            this.height = 60;
+            this.y = gameHeight - 40 - this.height; // Floor level
+            this.image = new Image();
+            this.image.src = 'assets/fence.png';
+        } else if (type === 'bird') {
+            this.width = 48;
+            this.height = 48;
             this.y = gameHeight - 150 - Math.random() * 50; // In the air
+            this.image = new Image();
+            this.image.src = 'assets/bird.png';
+        }
+        
+        this.isLoaded = false;
+        if (this.image) {
+            this.image.onload = () => { this.isLoaded = true; };
         }
         
         this.x = gameWidth;
@@ -28,16 +37,16 @@ export class Obstacle {
     }
 
     draw(ctx) {
-        if (this.type === 'fence') {
-            ctx.fillStyle = '#A0522D'; // Sienna/Wood color
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-            // Planks
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(this.x - 5, this.y + 10, this.width + 10, 10);
-            ctx.fillRect(this.x - 5, this.y + 30, this.width + 10, 10);
-        } else if (this.type === 'bird') {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+        if (this.isLoaded) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            if (this.type === 'fence') {
+                ctx.fillStyle = '#A0522D';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            } else if (this.type === 'bird') {
+                ctx.fillStyle = 'red';
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
         }
     }
 }

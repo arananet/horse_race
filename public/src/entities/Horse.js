@@ -4,8 +4,8 @@ export class Horse {
         this.gameHeight = gameHeight;
         
         // Sizing for AABB Collision Box
-        this.width = 50;
-        this.height = 50;
+        this.width = 64;
+        this.height = 64;
         
         // Position
         this.x = 100; // Fixed x position for endless runner
@@ -20,6 +20,14 @@ export class Horse {
         // Double Jump State
         this.jumps = 0;
         this.maxJumps = 2; // Can jump mid-air once
+        
+        // Sprite
+        this.image = new Image();
+        this.image.src = 'assets/horse.png';
+        this.isLoaded = false;
+        this.image.onload = () => {
+            this.isLoaded = true;
+        };
     }
 
     update(input) {
@@ -45,20 +53,13 @@ export class Horse {
     }
 
     draw(ctx) {
-        // Placeholder Pixel Art (Brown Box with Eyes and Legs)
-        ctx.fillStyle = '#8B4513'; // SaddleBrown
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-
-        // Head/Neck
-        ctx.fillRect(this.x + this.width - 10, this.y - 15, 20, 20);
-        
-        // Eye
-        ctx.fillStyle = 'black';
-        ctx.fillRect(this.x + this.width, this.y - 10, 4, 4);
-
-        // Legs (Running animation placeholder)
-        ctx.fillStyle = '#5C4033'; // DarkBrown
-        ctx.fillRect(this.x + 10, this.y + this.height, 8, 15); // Back leg
-        ctx.fillRect(this.x + this.width - 15, this.y + this.height, 8, 15); // Front leg
+        if (this.isLoaded) {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        } else {
+            // Placeholder Pixel Art (Brown Box)
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.fillRect(this.x + this.width - 10, this.y - 15, 20, 20); // Head
+        }
     }
 }

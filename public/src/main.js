@@ -3,34 +3,37 @@ import { InputHandler } from './input.js';
 import { Background } from './entities/Background.js';
 import { Horse } from './entities/Horse.js';
 import { Obstacle } from './entities/Obstacle.js';
+import { Collectible } from './entities/Collectible.js';
 import { checkCollision } from './physics.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 
-// Internal resolution is fixed (Retro 16-bit aspect ratio)
-// CSS handles scaling this up/down to fit the mobile/desktop screen
 canvas.width = 800;
 canvas.height = 400;
 
-// Initialize Core Game Objects
 const input = new InputHandler(canvas);
 const background = new Background(canvas.width, canvas.height);
 let horse = new Horse(canvas.width, canvas.height);
 
 let gameSpeed = 6;
 let score = 0;
+let apples = 0;
 let isPaused = false;
 let isGameOver = false;
 
 let obstacles = [];
+let collectibles = [];
 let obstacleTimer = 0;
+let collectibleTimer = 0;
 let obstacleInterval = 2000;
 
 function resetGame() {
     horse = new Horse(canvas.width, canvas.height);
     obstacles = [];
+    collectibles = [];
     score = 0;
+    apples = 0;
     gameSpeed = 6;
     isGameOver = false;
     isPaused = false;
@@ -59,8 +62,16 @@ function update(dt) {
             const type = Math.random() > 0.8 ? 'bird' : 'fence';
             obstacles.push(new Obstacle(canvas.width, canvas.height, gameSpeed, type));
             obstacleTimer = 0;
-            // Spawns get closer together as you survive longer
             if (obstacleInterval > 800) obstacleInterval -= 20;
+        }
+
+        // Spawn Collectibles
+        collectibleTimer += dt;
+        if (collectibleTimer > 3000) {
+            if (Math.random() > 0.5) {
+                collectibles.push(new Collectible(canvas.width, canvas.height));
+            }
+            collectibleTimer = 0;
         }
 
         // Update Obstacles and Check Collisions
@@ -68,14 +79,30 @@ function update(dt) {
             let o = obstacles[i];
             o.update(gameSpeed);
             
-            // Collision Detection
-            if (checkCollision(horse, o)) {
+            // Death Box (AABB)
+            // Making the hit box slightly smaller than visual to feel "fair"
+            const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 20 };
+            const obsHitBox = { x: o.x + 5, y: o.y + 5, width: o.width - 10, height: o.height - 10 };
+            
+            if (checkCollision(horseHitBox, obsHitBox)) {
                 isGameOver = true;
             }
 
-            if (o.markedForDeletion) {
-                obstacles.splice(i, 1);
+            if (o.markedForDeletion) obstacles.splice(i, 1);
+        }
+
+        // Update Collectibles
+        for (let i = collectibles.length - 1; i >= 0; i--) {
+            let c = collectibles[i];
+            c.update(gameSpeed);
+            
+            if (checkCollision(horse, c)) {
+                c.markedForDeletion = true;
+                score += 100;
+                apples++;
             }
+
+            if (c.markedForDeletion) collectibles.splice(i, 1);
         }
         
         score += gameSpeed * 0.05;
@@ -86,9 +113,11 @@ function update(dt) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     background.draw(ctx);
-    horse.draw(ctx);
     
+    collectibles.forEach(c => c.draw(ctx));
     obstacles.forEach(o => o.draw(ctx));
+    
+    horse.draw(ctx);
     
     // UI Setup
     ctx.fillStyle = 'white';
@@ -97,6 +126,7 @@ function draw() {
     // Score
     ctx.textAlign = 'right';
     ctx.fillText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 30);
+    ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 60);
     
     // Mobile friendly controls text
     ctx.textAlign = 'left';
