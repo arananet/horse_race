@@ -172,7 +172,10 @@ function update(dt) {
                 // If the center of the horse is over the hole
                 const horseCenterX = horse.x + (horse.width / 2);
                 if (horseCenterX > o.x && horseCenterX < o.x + o.width) {
-                    isOverHole = true;
+                    // Only start falling if we are close to the ground (not high in the jump)
+                    if (horse.y >= horse.baseGroundY - 5) {
+                        isOverHole = true;
+                    }
                 }
             } else {
                 const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 15 };
@@ -186,10 +189,10 @@ function update(dt) {
             if (o.markedForDeletion) obstacles.splice(i, 1);
         }
 
-        if (isOverHole) {
+        // Handle falling into holes
+        if (isOverHole || horse.groundY > horse.baseGroundY) {
             horse.groundY = canvas.height + 200; // Remove floor
-            // Only trigger game over if the horse actually falls low enough into the hole
-            if (horse.y > 320) { 
+            if (horse.y > 350) { 
                 triggerGameOver();
             }
         } else {
@@ -222,15 +225,19 @@ function drawMenu() {
 
     ctx.textAlign = 'center';
     
+    const title = 'HORSE RACE v1.0.3';
+    ctx.font = 'bold 50px "Press Start 2P", Courier';
+
+    // Draw Shadow First
+    ctx.fillStyle = '#000080';
+    ctx.fillText(title, canvas.width / 2 + 5, 85);
+
+    // Draw Main Title
     ctx.fillStyle = '#ff4500';
-    ctx.font = '50px "Press Start 2P", Courier';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText('HORSE RACE v1.0.2', canvas.width / 2, 80);
-    ctx.fillText('HORSE RACE v1.0.2', canvas.width / 2, 80);
-    
-    ctx.fillStyle = '#000080';
-    ctx.fillText('HORSE RACE', canvas.width / 2 + 5, 85);
+    ctx.strokeText(title, canvas.width / 2, 80);
+    ctx.fillText(title, canvas.width / 2, 80);
     
     ctx.font = '20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;

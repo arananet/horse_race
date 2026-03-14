@@ -45,15 +45,15 @@ export class Horse {
 
         this.y += this.vy;
         
-        // Falling into a hole check
-        if (this.y > this.baseGroundY + 10) {
-            this.vy += this.gravity; // Free fall
+        // Falling into a hole check (free fall mode)
+        if (this.groundY > this.baseGroundY + 10) {
+            this.vy += this.gravity;
             this.frame = 1;
+            // No landing logic while groundY is removed
         } else if (this.y < this.groundY) {
-            this.vy += this.gravity; // Normal gravity
+            this.vy += this.gravity;
             this.frame = 1; 
         } else {
-            // Landed normally
             this.y = this.groundY;
             this.vy = 0;
             this.jumps = 0; 
