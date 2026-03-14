@@ -18,7 +18,7 @@ let horse = new Horse(canvas.width, canvas.height);
 
 let currentState = 'MENU';
 let menuSelection = 0; 
-let highScores = JSON.parse(localStorage.getItem('roachRaceHighScores')) || [];
+let highScores = JSON.parse(localStorage.getItem('horseRaceHighScores')) || [];
 
 let gameSpeed = 6;
 let score = 0;
@@ -52,7 +52,7 @@ function saveHighScore() {
     highScores.push(finalScore);
     highScores.sort((a, b) => b - a);
     highScores = highScores.slice(0, 5); 
-    localStorage.setItem('roachRaceHighScores', JSON.stringify(highScores));
+    localStorage.setItem('horseRaceHighScores', JSON.stringify(highScores));
 }
 
 function update(dt) {
@@ -173,11 +173,11 @@ function drawMenu() {
     ctx.font = '50px "Press Start 2P", Courier';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText('ROACH RACE', canvas.width / 2, 120);
-    ctx.fillText('ROACH RACE', canvas.width / 2, 120);
+    ctx.strokeText('HORSE RACE', canvas.width / 2, 120);
+    ctx.fillText('HORSE RACE', canvas.width / 2, 120);
     
     ctx.fillStyle = '#000080';
-    ctx.fillText('ROACH RACE', canvas.width / 2 + 5, 125);
+    ctx.fillText('HORSE RACE', canvas.width / 2 + 5, 125);
     
     ctx.font = '20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;
@@ -216,7 +216,6 @@ function draw() {
     
     if (currentState === 'MENU') {
         drawMenu();
-        // Stop drawing the horse in the exact same spot on the menu to avoid clutter
         return;
     }
 
@@ -262,7 +261,6 @@ function draw() {
     ctx.strokeText(`APPLES: ${apples}`, canvas.width - 20, 70);
     ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 70);
     
-    // Top Left indicator like the reference images (replaces the TAP/SPACE instructions during gameplay to clean up the UI)
     ctx.fillStyle = 'white';
     ctx.textAlign = 'left';
     ctx.strokeText('LVL 1', 20, 40);
@@ -278,7 +276,7 @@ function draw() {
     }
 
     if (currentState === 'GAMEOVER') {
-        ctx.fillStyle = 'rgba(139, 0, 0, 0.5)'; // Dark red tint
+        ctx.fillStyle = 'rgba(139, 0, 0, 0.5)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.fillStyle = 'white';
