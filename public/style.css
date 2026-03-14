@@ -1,0 +1,30 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: #111;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 800px;
+    height: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    border: 4px solid #333;
+    border-radius: 4px;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* This is critical for keeping pixel art crisp when scaling */
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background-color: #87CEEB; /* Fallback sky color */
+}
