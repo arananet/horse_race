@@ -5,6 +5,7 @@ import { Horse } from './entities/Horse.js';
 import { Obstacle } from './entities/Obstacle.js';
 import { Collectible } from './entities/Collectible.js';
 import { checkCollision } from './physics.js';
+import { initAudio, playMusic, stopMusic, SFX } from './audio.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d', { alpha: false });
@@ -30,6 +31,7 @@ let collectibles = [];
 let obstacleTimer = 0;
 let collectibleTimer = 0;
 let obstacleInterval = 1500;
+let didInitAudio = false;
 
 document.fonts.ready.then(() => {
     console.log("Fonts loaded.");
@@ -55,27 +57,49 @@ function saveHighScore() {
     localStorage.setItem('horseRaceHighScores', JSON.stringify(highScores));
 }
 
+function ensureAudio() {
+    if (!didInitAudio) {
+        initAudio();
+        playMusic();
+        didInitAudio = true;
+    }
+}
+
+function triggerGameOver() {
+    SFX.hit();
+    saveHighScore();
+    currentState = 'GAMEOVER';
+}
+
 function update(dt) {
     if (currentState === 'MENU') {
         background.update(1.0); 
         
         if (input.consumeUp() || input.consumeDown()) {
             menuSelection = menuSelection === 0 ? 1 : 0;
+            ensureAudio(); // First interaction unlocks audio
         }
         
         if (input.consumeEnter()) {
+            ensureAudio();
             if (menuSelection === 0) resetGame();
             if (menuSelection === 1) currentState = 'HIGHSCORES';
         }
         
-        const startBtn = { x: 300, y: 220, w: 200, h: 40 };
-        const scoreBtn = { x: 300, y: 270, w: 200, h: 40 };
+        const startBtn = { x: 300, y: 160, w: 200, h: 40 };
+        const scoreBtn = { x: 300, y: 210, w: 200, h: 40 };
         
         if (input.isHovering(startBtn)) menuSelection = 0;
         if (input.isHovering(scoreBtn)) menuSelection = 1;
         
-        if (input.consumeClick(startBtn)) resetGame();
-        if (input.consumeClick(scoreBtn)) currentState = 'HIGHSCORES';
+        if (input.consumeClick(startBtn)) {
+            ensureAudio();
+            resetGame();
+        }
+        if (input.consumeClick(scoreBtn)) {
+            ensureAudio();
+            currentState = 'HIGHSCORES';
+        }
         
         return;
     }
@@ -94,6 +118,7 @@ function update(dt) {
     }
 
     if (currentState === 'GAMEOVER') {
+        horse.y += horse.gravity * 2; // Let horse fall off screen if in a hole
         if (input.consumeJump() || input.consumeEnter()) {
             currentState = 'MENU';
         }
@@ -112,9 +137,18 @@ function update(dt) {
         obstacleTimer += dt;
         if (obstacleTimer > obstacleInterval) {
             let type = 'fence';
-            if (distance > 1000 && Math.random() > 0.6) {
-                type = 'bird';
+            const r = Math.random();
+            if (distance > 1000) {
+                if (r > 0.7) {
+                    type = 'bird';
+                    SFX.eagle(); // Play eagle scream when it spawns!
+                } else if (r > 0.4) {
+                    type = 'hole';
+                }
+            } else if (distance > 500 && r > 0.7) {
+                type = 'hole';
             }
+
             obstacles.push(new Obstacle(canvas.width, canvas.height, gameSpeed, type));
             obstacleTimer = 0;
             if (obstacleInterval > 700) obstacleInterval -= 15;
@@ -128,20 +162,39 @@ function update(dt) {
             collectibleTimer = 0;
         }
 
+        let isOverHole = false;
+
         for (let i = obstacles.length - 1; i >= 0; i--) {
             let o = obstacles[i];
             o.update(gameSpeed);
             
-            // Forgiving hitbox
-            const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 15 };
-            const obsHitBox = { x: o.x + 5, y: o.y + 5, width: o.width - 10, height: o.height - 10 };
-            
-            if (checkCollision(horseHitBox, obsHitBox)) {
-                saveHighScore();
-                currentState = 'GAMEOVER';
+            if (o.type === 'hole') {
+                // If horse is horizontally entirely inside the hole gap, and vertically at ground level
+                if (horse.x > o.x - 10 && horse.x + horse.width < o.x + o.width + 10) {
+                    if (horse.y >= horse.groundY - 5) {
+                        isOverHole = true;
+                    }
+                }
+            } else {
+                const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 15 };
+                const obsHitBox = { x: o.x + 5, y: o.y + 5, width: o.width - 10, height: o.height - 10 };
+                
+                if (checkCollision(horseHitBox, obsHitBox)) {
+                    triggerGameOver();
+                }
             }
 
             if (o.markedForDeletion) obstacles.splice(i, 1);
+        }
+
+        // Handle falling into holes
+        if (isOverHole) {
+            horse.groundY = canvas.height + 200; // Remove the floor, horse falls
+            if (horse.y > 350) { // Once fallen below screen
+                triggerGameOver();
+            }
+        } else {
+            horse.groundY = 300 - horse.height + 6; // Restore floor
         }
 
         for (let i = collectibles.length - 1; i >= 0; i--) {
@@ -152,6 +205,7 @@ function update(dt) {
                 c.markedForDeletion = true;
                 score += 50; 
                 apples++;
+                SFX.apple(); // Apple crunch sound
             }
 
             if (c.markedForDeletion) collectibles.splice(i, 1);
@@ -164,20 +218,21 @@ function update(dt) {
 }
 
 function drawMenu() {
-    // Menu Background Tint
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.textAlign = 'center';
+    
+    // Shifted title and menu up to make room for credits
     ctx.fillStyle = '#ff4500';
     ctx.font = '50px "Press Start 2P", Courier';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText('HORSE RACE', canvas.width / 2, 120);
-    ctx.fillText('HORSE RACE', canvas.width / 2, 120);
+    ctx.strokeText('HORSE RACE', canvas.width / 2, 80);
+    ctx.fillText('HORSE RACE', canvas.width / 2, 80);
     
     ctx.fillStyle = '#000080';
-    ctx.fillText('HORSE RACE', canvas.width / 2 + 5, 125);
+    ctx.fillText('HORSE RACE', canvas.width / 2 + 5, 85);
     
     ctx.font = '20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;
@@ -187,27 +242,34 @@ function drawMenu() {
     
     ctx.fillStyle = startColor;
     ctx.strokeStyle = 'black';
-    ctx.strokeText('START GAME', canvas.width / 2, 240);
-    ctx.fillText('START GAME', canvas.width / 2, 240);
+    ctx.strokeText('START GAME', canvas.width / 2, 180);
+    ctx.fillText('START GAME', canvas.width / 2, 180);
     
     if (menuSelection === 0) {
         ctx.fillStyle = '#ff4500';
-        ctx.fillText('►', canvas.width / 2 - 120, 240);
+        ctx.fillText('►', canvas.width / 2 - 120, 180);
     }
     
     ctx.fillStyle = scoreColor;
-    ctx.strokeText('HIGH SCORES', canvas.width / 2, 290);
-    ctx.fillText('HIGH SCORES', canvas.width / 2, 290);
+    ctx.strokeText('HIGH SCORES', canvas.width / 2, 230);
+    ctx.fillText('HIGH SCORES', canvas.width / 2, 230);
     
     if (menuSelection === 1) {
         ctx.fillStyle = '#ff4500';
-        ctx.fillText('►', canvas.width / 2 - 130, 290);
+        ctx.fillText('►', canvas.width / 2 - 130, 230);
     }
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = '10px "Press Start 2P", Courier';
-    ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 20);
-    ctx.fillText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 20);
+    // Credits shifted to the bottom center
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = '12px "Press Start 2P", Courier';
+    ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 30);
+    ctx.fillText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 30);
+    
+    if (!didInitAudio) {
+        ctx.fillStyle = 'yellow';
+        ctx.font = '10px "Press Start 2P", Courier';
+        ctx.fillText('(Click anywhere to enable audio)', canvas.width / 2, 280);
+    }
 }
 
 function draw() {

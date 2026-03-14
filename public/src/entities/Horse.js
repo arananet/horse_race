@@ -1,4 +1,5 @@
 import { drawSprite } from './HorseSprite.js';
+import { SFX } from '../audio.js';
 
 export class Horse {
     constructor(gameWidth, gameHeight) {
@@ -6,14 +7,12 @@ export class Horse {
         this.gameHeight = gameHeight;
         
         this.scale = 3;
-        this.width = 24 * this.scale;  // 72
-        this.height = 15 * this.scale; // 45
+        this.width = 24 * this.scale;  
+        this.height = 15 * this.scale; 
         
-        this.x = 100; // Pulling back slightly to give more reaction time
+        this.x = 100; 
         
-        // Ground grass line is at y=300
-        // We set the horse's bottom to rest exactly on that line
-        this.groundY = 300 - this.height + 6; // +6 sinks the hooves slightly into the grass for depth
+        this.groundY = 300 - this.height + 6; 
         this.y = this.groundY;
         
         this.vy = 0; 
@@ -28,21 +27,33 @@ export class Horse {
     }
 
     update(input) {
-        this.runCycle += 0.25; // Faster leg animation to match the runner vibe
+        this.runCycle += 0.25; 
         this.frame = Math.floor(this.runCycle) % 3;
 
         if (input.consumeJump()) {
-            if (this.jumps < this.maxJumps) {
+            if (this.jumps === 0) {
                 this.vy = this.jumpPower;
                 this.jumps++;
+                SFX.jump();
+            } else if (this.jumps < this.maxJumps) {
+                this.vy = this.jumpPower; // Allow double jump to reset velocity
+                this.jumps++;
+                SFX.doubleJump();
             }
         }
 
         this.y += this.vy;
         
-        if (this.y < this.groundY) {
+        // Don't land if we are over a hole! Main loop will handle the collision detection for falling into holes.
+        // We only enforce the ground plane if the main loop tells us we are safe, but for simplicity, 
+        // the horse always expects the ground to be at groundY unless it's currently falling into a hole.
+        
+        // If the horse is completely below the ground, let it fall (happens during a hole collision)
+        if (this.y > this.groundY && this.vy > 0) {
+            this.vy += this.gravity; // Keep falling
+        } else if (this.y < this.groundY) {
             this.vy += this.gravity;
-            this.frame = 1; // Tucked legs while jumping
+            this.frame = 1; 
         } else {
             this.y = this.groundY;
             this.vy = 0;
