@@ -8,10 +8,13 @@ import { checkCollision } from './physics.js';
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d', { alpha: false });
 
+// Internal resolution is fixed (Retro 16-bit aspect ratio)
+// CSS handles scaling this up/down to fit the mobile/desktop screen
 canvas.width = 800;
 canvas.height = 400;
 
-const input = new InputHandler();
+// Initialize Core Game Objects
+const input = new InputHandler(canvas);
 const background = new Background(canvas.width, canvas.height);
 let horse = new Horse(canvas.width, canvas.height);
 
@@ -35,12 +38,12 @@ function resetGame() {
 }
 
 function update(dt) {
-    if (input.consume('KeyP') || input.consume('Escape')) {
+    if (input.consumePause()) {
         if (!isGameOver) isPaused = !isPaused;
     }
 
     if (isGameOver) {
-        if (input.consume('Space') || input.consume('Enter')) {
+        if (input.consumeJump()) {
             resetGame();
         }
         return;
@@ -95,9 +98,10 @@ function draw() {
     ctx.textAlign = 'right';
     ctx.fillText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 30);
     
+    // Mobile friendly controls text
     ctx.textAlign = 'left';
     ctx.font = '14px "Courier New"';
-    ctx.fillText('SPACE/UP: Double Jump | P/ESC: Pause', 20, canvas.height - 10);
+    ctx.fillText('TAP/SPACE: Double Jump', 20, canvas.height - 10);
     
     if (isPaused) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -120,7 +124,7 @@ function draw() {
         ctx.font = 'bold 20px "Courier New"';
         ctx.fillText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 20);
         ctx.font = '16px "Courier New"';
-        ctx.fillText('Press SPACE to Restart', canvas.width / 2, canvas.height / 2 + 60);
+        ctx.fillText('Tap or Space to Restart', canvas.width / 2, canvas.height / 2 + 60);
     }
 }
 

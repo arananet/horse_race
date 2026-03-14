@@ -3,28 +3,75 @@ body, html {
     padding: 0;
     background-color: #111;
     height: 100vh;
+    width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
     font-family: 'Courier New', Courier, monospace;
     overflow: hidden;
+    /* Prevent pull-to-refresh and selection on mobile */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 #game-container {
     position: relative;
-    width: 800px;
-    height: 400px;
+    /* Use dynamic viewport units but maintain aspect ratio */
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-    border: 4px solid #333;
-    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+/* 
+ * The canvas internal resolution is fixed (e.g. 800x400)
+ * but CSS scales it to fit the screen while keeping the aspect ratio using object-fit.
+ */
 canvas {
     display: block;
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    aspect-ratio: 2 / 1;
+    
     /* This is critical for keeping pixel art crisp when scaling */
     image-rendering: pixelated;
     image-rendering: crisp-edges;
     background-color: #87CEEB; /* Fallback sky color */
+    
+    border: 4px solid #333;
+    border-radius: 4px;
+}
+
+/* Mobile Portrait Overlay Hint */
+#orientation-lock {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #111;
+    color: white;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+@media screen and (orientation: portrait) and (max-width: 768px) {
+    #orientation-lock {
+        display: flex;
+    }
+    #game-container {
+        display: none;
+    }
 }

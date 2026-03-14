@@ -23,8 +23,8 @@ export class Horse {
     }
 
     update(input) {
-        // Jump Logic (Spacebar or Up Arrow)
-        if (input.consume('Space') || input.consume('ArrowUp')) {
+        // Unified Jump Logic (Keyboard Space/Up or Mobile Touch)
+        if (input.consumeJump()) {
             if (this.jumps < this.maxJumps) {
                 this.vy = this.jumpPower;
                 this.jumps++;
