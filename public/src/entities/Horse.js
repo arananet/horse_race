@@ -12,7 +12,8 @@ export class Horse {
         
         this.x = 100; 
         
-        this.groundY = 300 - this.height + 6; 
+        this.baseGroundY = 300 - this.height + 6; 
+        this.groundY = this.baseGroundY;
         this.y = this.groundY;
         
         this.vy = 0; 
@@ -31,12 +32,12 @@ export class Horse {
         this.frame = Math.floor(this.runCycle) % 3;
 
         if (input.consumeJump()) {
-            if (this.jumps === 0) {
+            if (this.jumps === 0 && this.y >= this.groundY - 5) {
                 this.vy = this.jumpPower;
                 this.jumps++;
                 SFX.jump();
-            } else if (this.jumps < this.maxJumps) {
-                this.vy = this.jumpPower; // Allow double jump to reset velocity
+            } else if (this.jumps > 0 && this.jumps < this.maxJumps) {
+                this.vy = this.jumpPower; 
                 this.jumps++;
                 SFX.doubleJump();
             }
@@ -44,17 +45,15 @@ export class Horse {
 
         this.y += this.vy;
         
-        // Don't land if we are over a hole! Main loop will handle the collision detection for falling into holes.
-        // We only enforce the ground plane if the main loop tells us we are safe, but for simplicity, 
-        // the horse always expects the ground to be at groundY unless it's currently falling into a hole.
-        
-        // If the horse is completely below the ground, let it fall (happens during a hole collision)
-        if (this.y > this.groundY && this.vy > 0) {
-            this.vy += this.gravity; // Keep falling
+        // Falling into a hole check
+        if (this.y > this.baseGroundY + 10) {
+            this.vy += this.gravity; // Free fall
+            this.frame = 1;
         } else if (this.y < this.groundY) {
-            this.vy += this.gravity;
+            this.vy += this.gravity; // Normal gravity
             this.frame = 1; 
         } else {
+            // Landed normally
             this.y = this.groundY;
             this.vy = 0;
             this.jumps = 0; 

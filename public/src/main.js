@@ -77,7 +77,7 @@ function update(dt) {
         
         if (input.consumeUp() || input.consumeDown()) {
             menuSelection = menuSelection === 0 ? 1 : 0;
-            ensureAudio(); // First interaction unlocks audio
+            ensureAudio(); 
         }
         
         if (input.consumeEnter()) {
@@ -118,7 +118,7 @@ function update(dt) {
     }
 
     if (currentState === 'GAMEOVER') {
-        horse.y += horse.gravity * 2; // Let horse fall off screen if in a hole
+        horse.y += horse.gravity * 2; 
         if (input.consumeJump() || input.consumeEnter()) {
             currentState = 'MENU';
         }
@@ -141,7 +141,7 @@ function update(dt) {
             if (distance > 1000) {
                 if (r > 0.7) {
                     type = 'bird';
-                    SFX.eagle(); // Play eagle scream when it spawns!
+                    SFX.eagle(); 
                 } else if (r > 0.4) {
                     type = 'hole';
                 }
@@ -169,11 +169,10 @@ function update(dt) {
             o.update(gameSpeed);
             
             if (o.type === 'hole') {
-                // If horse is horizontally entirely inside the hole gap, and vertically at ground level
-                if (horse.x > o.x - 10 && horse.x + horse.width < o.x + o.width + 10) {
-                    if (horse.y >= horse.groundY - 5) {
-                        isOverHole = true;
-                    }
+                // If the center of the horse is over the hole
+                const horseCenterX = horse.x + (horse.width / 2);
+                if (horseCenterX > o.x && horseCenterX < o.x + o.width) {
+                    isOverHole = true;
                 }
             } else {
                 const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 15 };
@@ -187,14 +186,14 @@ function update(dt) {
             if (o.markedForDeletion) obstacles.splice(i, 1);
         }
 
-        // Handle falling into holes
         if (isOverHole) {
-            horse.groundY = canvas.height + 200; // Remove the floor, horse falls
-            if (horse.y > 350) { // Once fallen below screen
+            horse.groundY = canvas.height + 200; // Remove floor
+            // Only trigger game over if the horse actually falls low enough into the hole
+            if (horse.y > 320) { 
                 triggerGameOver();
             }
         } else {
-            horse.groundY = 300 - horse.height + 6; // Restore floor
+            horse.groundY = horse.baseGroundY; // Restore floor
         }
 
         for (let i = collectibles.length - 1; i >= 0; i--) {
@@ -205,7 +204,7 @@ function update(dt) {
                 c.markedForDeletion = true;
                 score += 50; 
                 apples++;
-                SFX.apple(); // Apple crunch sound
+                SFX.apple(); 
             }
 
             if (c.markedForDeletion) collectibles.splice(i, 1);
@@ -223,7 +222,6 @@ function drawMenu() {
 
     ctx.textAlign = 'center';
     
-    // Shifted title and menu up to make room for credits
     ctx.fillStyle = '#ff4500';
     ctx.font = '50px "Press Start 2P", Courier';
     ctx.lineWidth = 5;
@@ -259,7 +257,6 @@ function drawMenu() {
         ctx.fillText('►', canvas.width / 2 - 130, 230);
     }
 
-    // Credits shifted to the bottom center
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = '12px "Press Start 2P", Courier';
     ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 30);
