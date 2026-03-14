@@ -14,7 +14,7 @@ export class Obstacle {
             this.y = 300 - 150 - Math.random() * 50; 
             this.wingCycle = Math.random() * 10;
         } else if (type === 'hole') {
-            this.width = 80; // A gap in the ground
+            this.width = 120; // Made hole wider to be more visible and require a committed jump
             this.height = 100; // Deep hole
             this.y = 300; // Starts exactly at the grass line
         }
@@ -54,13 +54,24 @@ export class Obstacle {
             ctx.fillRect(this.x + 12, this.y + 5 + flap, 10, 8);
         } else if (this.type === 'hole') {
             // Draw a black void over the ground
-            ctx.fillStyle = '#000000';
+            ctx.fillStyle = '#000';
             ctx.fillRect(this.x, this.y, this.width, this.height);
             
-            // Add some dirt edges to the hole
-            ctx.fillStyle = '#6B4A31';
-            ctx.fillRect(this.x - 5, this.y + 10, 5, 20);
-            ctx.fillRect(this.x + this.width, this.y + 20, 5, 15);
+            // Add high-contrast warning edges (yellow/black construction tape look) on the grass level
+            ctx.fillStyle = '#FFD700'; // Yellow
+            ctx.fillRect(this.x - 15, this.y, 15, 10);
+            ctx.fillStyle = '#000'; // Black stripe
+            ctx.fillRect(this.x - 10, this.y, 5, 10);
+            
+            ctx.fillStyle = '#FFD700'; 
+            ctx.fillRect(this.x + this.width, this.y, 15, 10);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(this.x + this.width + 5, this.y, 5, 10);
+            
+            // Dirt walls inside the hole
+            ctx.fillStyle = '#4A3121';
+            ctx.fillRect(this.x - 5, this.y + 10, 5, 40);
+            ctx.fillRect(this.x + this.width, this.y + 10, 5, 40);
         }
     }
 }
