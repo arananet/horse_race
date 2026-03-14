@@ -4,11 +4,11 @@ export class Obstacle {
         this.gameHeight = gameHeight;
         this.type = type;
         
-        // Ground line is exactly at y=300
         if (type === 'fence') {
             this.width = 40;
             this.height = 40;
-            this.y = 300 - this.height; 
+            // Sink slightly into the grass
+            this.y = 300 - this.height + 5; 
         } else if (type === 'bird') {
             this.width = 30;
             this.height = 20;
@@ -32,23 +32,21 @@ export class Obstacle {
 
     draw(ctx) {
         if (this.type === 'fence') {
-            // Pixel-art wooden fence matching the reference style
-            ctx.fillStyle = '#D2691E'; // Chocolate
-            ctx.fillRect(this.x + 5, this.y, 10, this.height); // Post 1
-            ctx.fillRect(this.x + 25, this.y, 10, this.height); // Post 2
-            ctx.fillStyle = '#A0522D'; // Sienna
-            ctx.fillRect(this.x, this.y + 10, this.width, 8); // Plank 1
-            ctx.fillRect(this.x, this.y + 25, this.width, 8); // Plank 2
+            ctx.fillStyle = '#1A1A1A'; // Black silhouette to match the horse
+            ctx.fillRect(this.x + 5, this.y, 10, this.height); 
+            ctx.fillRect(this.x + 25, this.y, 10, this.height); 
+            ctx.fillRect(this.x, this.y + 10, this.width, 8); 
+            ctx.fillRect(this.x, this.y + 25, this.width, 8); 
         } else if (this.type === 'bird') {
-            ctx.fillStyle = '#222'; 
+            ctx.fillStyle = '#1A1A1A'; // Black silhouette
             ctx.fillRect(this.x + 10, this.y + 5, 15, 10); 
             ctx.fillRect(this.x + 5, this.y + 5, 5, 5); 
             ctx.fillRect(this.x + 25, this.y + 8, 5, 5); 
             
-            ctx.fillStyle = '#FFD700';
-            ctx.fillRect(this.x + 30, this.y + 8, 5, 4);
+            ctx.fillStyle = '#F00'; // Red eye
+            ctx.fillRect(this.x + 27, this.y + 9, 2, 2);
             
-            ctx.fillStyle = '#555';
+            ctx.fillStyle = '#1A1A1A';
             const flap = Math.sin(this.wingCycle) > 0 ? -10 : 5;
             ctx.fillRect(this.x + 12, this.y + 5 + flap, 10, 8);
         }

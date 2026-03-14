@@ -5,19 +5,17 @@ export class Horse {
         this.gameWidth = gameWidth;
         this.gameHeight = gameHeight;
         
-        // Match the scale from the drawSprite function (15 rows * 3 scale)
         this.scale = 3;
         this.width = 24 * this.scale;  // 72
         this.height = 15 * this.scale; // 45
         
-        // Position
-        this.x = 150; // Move slightly further to the right to match the reference image
+        this.x = 100; // Pulling back slightly to give more reaction time
         
-        // The ground grass line is at y=300, and the horse runs exactly on top of it
-        this.groundY = 300 - this.height; 
+        // Ground grass line is at y=300
+        // We set the horse's bottom to rest exactly on that line
+        this.groundY = 300 - this.height + 6; // +6 sinks the hooves slightly into the grass for depth
         this.y = this.groundY;
         
-        // Physics
         this.vy = 0; 
         this.gravity = 0.6; 
         this.jumpPower = -12; 
@@ -25,13 +23,12 @@ export class Horse {
         this.jumps = 0;
         this.maxJumps = 2; 
         
-        // Animation
         this.runCycle = 0;
         this.frame = 0;
     }
 
     update(input) {
-        this.runCycle += 0.2; 
+        this.runCycle += 0.25; // Faster leg animation to match the runner vibe
         this.frame = Math.floor(this.runCycle) % 3;
 
         if (input.consumeJump()) {
@@ -45,7 +42,7 @@ export class Horse {
         
         if (this.y < this.groundY) {
             this.vy += this.gravity;
-            this.frame = 1; // Use contracted frame when jumping
+            this.frame = 1; // Tucked legs while jumping
         } else {
             this.y = this.groundY;
             this.vy = 0;

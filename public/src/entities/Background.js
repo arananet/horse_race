@@ -25,65 +25,67 @@ class BackgroundLayer {
 
     renderPattern(ctx, xOffset) {
         if (this.type === 'sky') {
-            // Flat light blue sky to match reference precisely
-            ctx.fillStyle = '#79C8F8'; 
+            ctx.fillStyle = '#6E93B6'; // The exact blue/grey from the new screenshot
             ctx.fillRect(xOffset, 0, this.width, this.height);
 
-            // Blocky 8-bit Clouds (white & light grey)
+            // Blocky 8-bit Clouds (white)
             ctx.fillStyle = '#FFFFFF';
             // Cloud 1
-            ctx.fillRect(xOffset + 150, 60, 60, 20);
-            ctx.fillRect(xOffset + 130, 80, 100, 20);
-            ctx.fillRect(xOffset + 170, 40, 20, 20);
-            ctx.fillStyle = '#E0E0E0'; // Cloud shadow
-            ctx.fillRect(xOffset + 130, 100, 100, 10);
+            ctx.fillRect(xOffset + 150, 40, 40, 20);
+            ctx.fillRect(xOffset + 130, 60, 80, 20);
+            ctx.fillRect(xOffset + 110, 80, 120, 20);
             
             // Cloud 2
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(xOffset + 500, 30, 80, 20);
-            ctx.fillRect(xOffset + 480, 50, 120, 20);
-            ctx.fillRect(xOffset + 520, 10, 40, 20);
-            ctx.fillStyle = '#E0E0E0';
-            ctx.fillRect(xOffset + 480, 70, 120, 10);
+            ctx.fillRect(xOffset + 500, 20, 40, 20);
+            ctx.fillRect(xOffset + 480, 40, 80, 20);
+            ctx.fillRect(xOffset + 460, 60, 120, 20);
 
         } else if (this.type === 'mountains') {
-            // Teal/Blueish mountains in the back
-            ctx.fillStyle = '#4A8BB5'; 
-            for(let i=0; i<this.width; i+=300) {
+            // Dark grey/blueish mountains from the reference
+            ctx.fillStyle = '#3A5266'; 
+            for(let i=0; i<this.width; i+=250) {
                 ctx.beginPath();
                 ctx.moveTo(xOffset + i, this.height);
-                ctx.lineTo(xOffset + i + 150, 0);
-                ctx.lineTo(xOffset + i + 300, this.height);
-                ctx.fill();
-            }
-            
-            // Darker teal mountains in front
-            ctx.fillStyle = '#3978A3';
-            for(let i=150; i<this.width; i+=250) {
-                ctx.beginPath();
-                ctx.moveTo(xOffset + i, this.height);
-                ctx.lineTo(xOffset + i + 125, 40);
+                ctx.lineTo(xOffset + i + 125, 0);
                 ctx.lineTo(xOffset + i + 250, this.height);
                 ctx.fill();
             }
+            
+            // Lighter grey mountains in front
+            ctx.fillStyle = '#4D6B82';
+            for(let i=125; i<this.width; i+=200) {
+                ctx.beginPath();
+                ctx.moveTo(xOffset + i, this.height);
+                ctx.lineTo(xOffset + i + 100, 40);
+                ctx.lineTo(xOffset + i + 200, this.height);
+                ctx.fill();
+            }
         } else if (this.type === 'ground') {
-            // Bright green grass strip (Where the horse runs)
-            ctx.fillStyle = '#4CAF50'; 
+            // Black/Dark silhouette skyline base right above the grass
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(xOffset, -15, this.width, 15);
+            
+            // Grass
+            ctx.fillStyle = '#609D51'; // Grass green from reference
             ctx.fillRect(xOffset, 0, this.width, 30);
             
-            // Light green grass triangles/blades sticking up
-            ctx.fillStyle = '#81C784';
-            for(let i=0; i<this.width; i+=40) {
+            // Grass detailing triangles
+            ctx.fillStyle = '#79BB69'; // Lighter green triangles
+            for(let i=0; i<this.width; i+=30) {
                 ctx.beginPath();
                 ctx.moveTo(xOffset + i, 30);
-                ctx.lineTo(xOffset + i + 20, 0);
-                ctx.lineTo(xOffset + i + 40, 30);
+                ctx.lineTo(xOffset + i + 15, 0);
+                ctx.lineTo(xOffset + i + 30, 30);
                 ctx.fill();
             }
 
-            // Dark dirt base
-            ctx.fillStyle = '#8B4513';
+            // Dirt base
+            ctx.fillStyle = '#6B4A31'; // Dark reddish brown
             ctx.fillRect(xOffset, 30, this.width, this.height - 30);
+            
+            // Dark brown dirt detailing line below the grass
+            ctx.fillStyle = '#4A3121';
+            ctx.fillRect(xOffset, 30, this.width, 10);
         }
     }
 }
@@ -93,13 +95,9 @@ export class Background {
         this.width = width;
         this.height = height;
         
-        // Exact Layout based on the reference screenshots:
-        // Y=0 to Y=220: Sky & Clouds
-        // Y=200 to Y=300: Mountains
-        // Y=300 to Y=400: Ground (Grass & Dirt)
         this.layers = [
             new BackgroundLayer('sky', 0.1, 0, width, 220),
-            new BackgroundLayer('mountains', 0.3, 150, width, 150),
+            new BackgroundLayer('mountains', 0.3, 100, width, 200), // Pushed mountains down to match ref
             new BackgroundLayer('ground', 1.0, 300, width, 100)
         ];
     }
