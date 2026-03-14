@@ -225,7 +225,7 @@ function drawMenu() {
 
     ctx.textAlign = 'center';
     
-    const title = 'HORSE RACE v1.0.3';
+    const title = 'HORSE RACE v1.0.4';
     ctx.font = 'bold 50px "Press Start 2P", Courier';
 
     // Draw Shadow First
