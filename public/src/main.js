@@ -33,12 +33,10 @@ let collectibleTimer = 0;
 let obstacleInterval = 1500;
 let didInitAudio = false;
 
-// The ground height based on the new assets (v1.0.5)
 const GROUND_Y = 320;
 
 function resetGame() {
     horse = new Horse(canvas.width, canvas.height);
-    // Align horse with new ground
     horse.baseGroundY = GROUND_Y - horse.height + 6;
     horse.groundY = horse.baseGroundY;
     horse.y = horse.groundY;
@@ -195,15 +193,15 @@ function drawMenu() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.textAlign = 'center';
-    const title = 'HORSE RACE v1.0.5';
+    const title = 'HORSE RACE';
     ctx.font = 'bold 50px "Press Start 2P", Courier';
     ctx.fillStyle = '#000080';
-    ctx.fillText(title, canvas.width / 2 + 5, 85);
+    ctx.fillText(title, canvas.width / 2 + 5, 125);
     ctx.fillStyle = '#ff4500';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText(title, canvas.width / 2, 80);
-    ctx.fillText(title, canvas.width / 2, 80);
+    ctx.strokeText(title, canvas.width / 2, 120);
+    ctx.fillText(title, canvas.width / 2, 120);
     
     ctx.font = 'bold 20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;
@@ -211,13 +209,14 @@ function drawMenu() {
     const scoreColor = menuSelection === 1 ? 'white' : '#ccc';
     ctx.fillStyle = startColor;
     ctx.strokeStyle = 'black';
-    ctx.strokeText('START GAME', canvas.width / 2, 180);
-    ctx.fillText('START GAME', canvas.width / 2, 180);
-    if (menuSelection === 0) { ctx.fillStyle = '#ff4500'; ctx.fillText('►', canvas.width / 2 - 120, 180); }
+    ctx.strokeText('START GAME', canvas.width / 2, 240);
+    ctx.fillText('START GAME', canvas.width / 2, 240);
+    if (menuSelection === 0) { ctx.fillStyle = '#ff4500'; ctx.fillText('►', canvas.width / 2 - 120, 240); }
     ctx.fillStyle = scoreColor;
-    ctx.strokeText('HIGH SCORES', canvas.width / 2, 230);
-    ctx.fillText('HIGH SCORES', canvas.width / 2, 230);
-    if (menuSelection === 1) { ctx.fillStyle = '#ff4500'; ctx.fillText('►', canvas.width / 2 - 130, 230); }
+    ctx.strokeText('HIGH SCORES', canvas.width / 2, 290);
+    ctx.fillText('HIGH SCORES', canvas.width / 2, 290);
+    if (menuSelection === 1) { ctx.fillStyle = '#ff4500'; ctx.fillText('►', canvas.width / 2 - 130, 290); }
+    
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = '12px "Press Start 2P", Courier';
     ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 30);
