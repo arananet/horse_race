@@ -226,8 +226,8 @@ function drawMenu() {
     ctx.font = '50px "Press Start 2P", Courier';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText('HORSE RACE v1.0.1', canvas.width / 2, 80);
-    ctx.fillText('HORSE RACE v1.0.1', canvas.width / 2, 80);
+    ctx.strokeText('HORSE RACE v1.0.2', canvas.width / 2, 80);
+    ctx.fillText('HORSE RACE v1.0.2', canvas.width / 2, 80);
     
     ctx.fillStyle = '#000080';
     ctx.fillText('HORSE RACE', canvas.width / 2 + 5, 85);
