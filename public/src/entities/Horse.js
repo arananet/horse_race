@@ -5,18 +5,22 @@ export class Horse {
         this.gameWidth = gameWidth;
         this.gameHeight = gameHeight;
         
-        // Sizing for AABB Collision Box
-        this.width = 64;
-        this.height = 60; // 15 rows * 4 scale
+        // Match the scale from the drawSprite function (15 rows * 3 scale)
+        this.scale = 3;
+        this.width = 24 * this.scale;  // 72
+        this.height = 15 * this.scale; // 45
         
-        // Layout: Ground starts at y=300
-        this.x = 100; 
+        // Position
+        this.x = 150; // Move slightly further to the right to match the reference image
+        
+        // The ground grass line is at y=300, and the horse runs exactly on top of it
         this.groundY = 300 - this.height; 
         this.y = this.groundY;
         
+        // Physics
         this.vy = 0; 
-        this.gravity = 0.8; 
-        this.jumpPower = -14; 
+        this.gravity = 0.6; 
+        this.jumpPower = -12; 
         
         this.jumps = 0;
         this.maxJumps = 2; 
@@ -27,7 +31,7 @@ export class Horse {
     }
 
     update(input) {
-        this.runCycle += 0.15; 
+        this.runCycle += 0.2; 
         this.frame = Math.floor(this.runCycle) % 3;
 
         if (input.consumeJump()) {
@@ -50,7 +54,6 @@ export class Horse {
     }
 
     draw(ctx) {
-        // Draw using the embedded pixel-art matrix
-        drawSprite(ctx, this.frame, this.x, this.y, 4);
+        drawSprite(ctx, this.frame, this.x, this.y, this.scale);
     }
 }

@@ -1,76 +1,73 @@
 export const horseFrames = [
-    // Frame 0: Extended
+    // Frame 0: Extended (Legs spread out)
     [
-        "             bb     ",
-        "            bbbb    ",
-        "            bbbbbb  ",
-        "          bbbbwbbb  ",
-        "         bbbbbbbbb  ",
-        "    bbbbbbbbbbb     ",
-        "  bbbbbbbbbbbbb     ",
-        "  bbbbbbbbbbbb      ",
-        "  bbbbbbbbbbbb      ",
-        " bbbbbbbbbbbb       ",
-        " bb    bb  bb       ",
-        " bb    bb   bb      ",
-        "  bb    b   bb      ",
-        "  b         bb      ",
-        " bb          bb     "
+        "            bbb         ",
+        "           bbbbb        ",
+        "           bbbbbb       ",
+        "          bbbwbbb       ",
+        "         bbbbbbbb       ",
+        "    bbbbbbbbbbbb        ",
+        "  bbbbbbbbbbbbbb        ",
+        "  bbbbbbbbbbbbbbb       ",
+        "  bbbbbbbbbbbbbb        ",
+        " bbbbbbbbbbbbbb         ",
+        " bbb   bb   bbb         ",
+        " bbb   bb    bbb        ",
+        "  bb    b    bbb        ",
+        "  bb         bb         ",
+        " bbb          bbb       "
     ],
-    // Frame 1: Contracted
+    // Frame 1: Contracted (Legs tucked under)
     [
-        "             bb     ",
-        "            bbbb    ",
-        "            bbbbbb  ",
-        "          bbbbwbbb  ",
-        "         bbbbbbbbb  ",
-        "    bbbbbbbbbbb     ",
-        "  bbbbbbbbbbbbb     ",
-        "  bbbbbbbbbbbb      ",
-        "  bbbbbbbbbbbb      ",
-        " bbbbbbbbbbbb       ",
-        "  bb   bb  bb       ",
-        "  bb   bb  bb       ",
-        "   bb   b   bb      ",
-        "   bb   bb  bb      ",
-        "   bb   bb  bb      "
+        "            bbb         ",
+        "           bbbbb        ",
+        "           bbbbbb       ",
+        "          bbbwbbb       ",
+        "         bbbbbbbb       ",
+        "    bbbbbbbbbbbb        ",
+        "  bbbbbbbbbbbbbb        ",
+        "  bbbbbbbbbbbbbbb       ",
+        "  bbbbbbbbbbbbbb        ",
+        " bbbbbbbbbbbbbb         ",
+        "  bbb  bbb  bbb         ",
+        "  bbb  bbb  bbb         ",
+        "   bb   b   bbb         ",
+        "   bbb  bb  bbb         ",
+        "   bbb  bb  bbb         "
     ],
-    // Frame 2: Gallop
+    // Frame 2: Gallop (Legs mid-stride)
     [
-        "             bb     ",
-        "            bbbb    ",
-        "            bbbbbb  ",
-        "          bbbbwbbb  ",
-        "         bbbbbbbbb  ",
-        "    bbbbbbbbbbb     ",
-        "  bbbbbbbbbbbbb     ",
-        "  bbbbbbbbbbbb      ",
-        "  bbbbbbbbbbbb      ",
-        " bbbbbbbbbbbb       ",
-        " bbb   bb  bbb      ",
-        "  bb   bb   bb      ",
-        "  bb    b    bb     ",
-        "  bb    bb    bb    ",
-        "  bb    bb    bb    "
+        "            bbb         ",
+        "           bbbbb        ",
+        "           bbbbbb       ",
+        "          bbbwbbb       ",
+        "         bbbbbbbb       ",
+        "    bbbbbbbbbbbb        ",
+        "  bbbbbbbbbbbbbb        ",
+        "  bbbbbbbbbbbbbbb       ",
+        "  bbbbbbbbbbbbbb        ",
+        " bbbbbbbbbbbbbb         ",
+        " bbb   bbb  bbb         ",
+        "  bb   bbb   bbb        ",
+        "  bb    b    bbb        ",
+        "  bbb   bb    bb        ",
+        "  bbb   bb    bb        "
     ]
 ];
 
-export function drawSprite(ctx, frame, x, y, scale = 4) {
+export function drawSprite(ctx, frame, x, y, scale = 3) {
     const pixels = horseFrames[frame];
     for (let r = 0; r < pixels.length; r++) {
         for (let c = 0; c < pixels[r].length; c++) {
             const char = pixels[r][c];
             if (char === 'b') {
-                ctx.fillStyle = '#8B4513'; // SaddleBrown
+                ctx.fillStyle = '#654321'; // Darker brown matching the reference
                 ctx.fillRect(x + c * scale, y + r * scale, scale, scale);
             } else if (char === 'w') {
                 ctx.fillStyle = 'white'; // Eye white
                 ctx.fillRect(x + c * scale, y + r * scale, scale, scale);
                 ctx.fillStyle = 'black'; // Pupil
                 ctx.fillRect(x + c * scale + scale/2, y + r * scale, scale/2, scale/2);
-            } else if (char === 'd') {
-                ctx.fillStyle = '#5C4033'; // DarkBrown (Legs in bg)
-                ctx.fillRect(x + c * scale, y + r * scale, scale, scale);
             }
         }
     }

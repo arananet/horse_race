@@ -31,7 +31,6 @@ let obstacleTimer = 0;
 let collectibleTimer = 0;
 let obstacleInterval = 1500;
 
-// Load font before starting to ensure rendering doesn't glitch on first paint
 document.fonts.ready.then(() => {
     console.log("Fonts loaded.");
 });
@@ -133,8 +132,9 @@ function update(dt) {
             let o = obstacles[i];
             o.update(gameSpeed);
             
-            const horseHitBox = { x: horse.x + 15, y: horse.y + 15, width: horse.width - 30, height: horse.height - 30 };
-            const obsHitBox = { x: o.x + 10, y: o.y + 10, width: o.width - 20, height: o.height - 20 };
+            // Forgiving hitbox
+            const horseHitBox = { x: horse.x + 10, y: horse.y + 10, width: horse.width - 20, height: horse.height - 15 };
+            const obsHitBox = { x: o.x + 5, y: o.y + 5, width: o.width - 10, height: o.height - 10 };
             
             if (checkCollision(horseHitBox, obsHitBox)) {
                 saveHighScore();
@@ -164,6 +164,10 @@ function update(dt) {
 }
 
 function drawMenu() {
+    // Menu Background Tint
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff4500';
     ctx.font = '50px "Press Start 2P", Courier';
@@ -178,8 +182,8 @@ function drawMenu() {
     ctx.font = '20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;
     
-    const startColor = menuSelection === 0 ? 'white' : '#888';
-    const scoreColor = menuSelection === 1 ? 'white' : '#888';
+    const startColor = menuSelection === 0 ? 'white' : '#ccc';
+    const scoreColor = menuSelection === 1 ? 'white' : '#ccc';
     
     ctx.fillStyle = startColor;
     ctx.strokeStyle = 'black';
@@ -200,7 +204,6 @@ function drawMenu() {
         ctx.fillText('►', canvas.width / 2 - 130, 290);
     }
 
-    // Credits String
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.font = '10px "Press Start 2P", Courier';
     ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 20);
@@ -213,7 +216,7 @@ function draw() {
     
     if (currentState === 'MENU') {
         drawMenu();
-        horse.draw(ctx);
+        // Stop drawing the horse in the exact same spot on the menu to avoid clutter
         return;
     }
 
@@ -259,10 +262,11 @@ function draw() {
     ctx.strokeText(`APPLES: ${apples}`, canvas.width - 20, 70);
     ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 70);
     
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    // Top Left indicator like the reference images (replaces the TAP/SPACE instructions during gameplay to clean up the UI)
+    ctx.fillStyle = 'white';
     ctx.textAlign = 'left';
-    ctx.font = '10px "Press Start 2P", Courier';
-    ctx.fillText('TAP/SPACE: Jump | P: Pause', 20, canvas.height - 20);
+    ctx.strokeText('LVL 1', 20, 40);
+    ctx.fillText('LVL 1', 20, 40);
     
     if (currentState === 'PAUSED') {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
@@ -274,7 +278,7 @@ function draw() {
     }
 
     if (currentState === 'GAMEOVER') {
-        ctx.fillStyle = 'rgba(139, 0, 0, 0.7)'; 
+        ctx.fillStyle = 'rgba(139, 0, 0, 0.5)'; // Dark red tint
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.fillStyle = 'white';
