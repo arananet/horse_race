@@ -23,13 +23,18 @@ let highScores = JSON.parse(localStorage.getItem('roachRaceHighScores')) || [];
 let gameSpeed = 6;
 let score = 0;
 let apples = 0;
-let distance = 0; // Added pure distance tracker
+let distance = 0;
 
 let obstacles = [];
 let collectibles = [];
 let obstacleTimer = 0;
 let collectibleTimer = 0;
 let obstacleInterval = 1500;
+
+// Load font before starting to ensure rendering doesn't glitch on first paint
+document.fonts.ready.then(() => {
+    console.log("Fonts loaded.");
+});
 
 function resetGame() {
     horse = new Horse(canvas.width, canvas.height);
@@ -38,7 +43,7 @@ function resetGame() {
     score = 0;
     apples = 0;
     distance = 0;
-    gameSpeed = 5; // Start a bit slower
+    gameSpeed = 5; 
     obstacleInterval = 1500;
     currentState = 'PLAYING';
 }
@@ -47,7 +52,7 @@ function saveHighScore() {
     const finalScore = Math.floor(score);
     highScores.push(finalScore);
     highScores.sort((a, b) => b - a);
-    highScores = highScores.slice(0, 5); // Keep top 5
+    highScores = highScores.slice(0, 5); 
     localStorage.setItem('roachRaceHighScores', JSON.stringify(highScores));
 }
 
@@ -107,7 +112,6 @@ function update(dt) {
         
         obstacleTimer += dt;
         if (obstacleTimer > obstacleInterval) {
-            // Determine obstacle type based on distance (harder later)
             let type = 'fence';
             if (distance > 1000 && Math.random() > 0.6) {
                 type = 'bird';
@@ -129,7 +133,6 @@ function update(dt) {
             let o = obstacles[i];
             o.update(gameSpeed);
             
-            // Forgiving Hitbox
             const horseHitBox = { x: horse.x + 15, y: horse.y + 15, width: horse.width - 30, height: horse.height - 30 };
             const obsHitBox = { x: o.x + 10, y: o.y + 10, width: o.width - 20, height: o.height - 20 };
             
@@ -147,7 +150,7 @@ function update(dt) {
             
             if (checkCollision(horse, c)) {
                 c.markedForDeletion = true;
-                score += 50; // Apple bonus
+                score += 50; 
                 apples++;
             }
 
@@ -156,23 +159,23 @@ function update(dt) {
         
         distance += gameSpeed * 0.1;
         score += gameSpeed * 0.05;
-        gameSpeed += 0.0005; // Gradual speed increase
+        gameSpeed += 0.0005; 
     }
 }
 
 function drawMenu() {
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff4500';
-    ctx.font = 'bold 70px "Courier New"';
+    ctx.font = '50px "Press Start 2P", Courier';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
-    ctx.strokeText('ROACH RACE', canvas.width / 2, 140);
-    ctx.fillText('ROACH RACE', canvas.width / 2, 140);
+    ctx.strokeText('ROACH RACE', canvas.width / 2, 120);
+    ctx.fillText('ROACH RACE', canvas.width / 2, 120);
     
     ctx.fillStyle = '#000080';
-    ctx.fillText('ROACH RACE', canvas.width / 2 + 5, 145);
+    ctx.fillText('ROACH RACE', canvas.width / 2 + 5, 125);
     
-    ctx.font = 'bold 30px "Courier New"';
+    ctx.font = '20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;
     
     const startColor = menuSelection === 0 ? 'white' : '#888';
@@ -180,22 +183,28 @@ function drawMenu() {
     
     ctx.fillStyle = startColor;
     ctx.strokeStyle = 'black';
-    ctx.strokeText('START GAME', canvas.width / 2, 260);
-    ctx.fillText('START GAME', canvas.width / 2, 260);
+    ctx.strokeText('START GAME', canvas.width / 2, 240);
+    ctx.fillText('START GAME', canvas.width / 2, 240);
     
     if (menuSelection === 0) {
         ctx.fillStyle = '#ff4500';
-        ctx.fillText('►', canvas.width / 2 - 120, 260);
+        ctx.fillText('►', canvas.width / 2 - 120, 240);
     }
     
     ctx.fillStyle = scoreColor;
-    ctx.strokeText('HIGH SCORES', canvas.width / 2, 320);
-    ctx.fillText('HIGH SCORES', canvas.width / 2, 320);
+    ctx.strokeText('HIGH SCORES', canvas.width / 2, 290);
+    ctx.fillText('HIGH SCORES', canvas.width / 2, 290);
     
     if (menuSelection === 1) {
         ctx.fillStyle = '#ff4500';
-        ctx.fillText('►', canvas.width / 2 - 130, 320);
+        ctx.fillText('►', canvas.width / 2 - 130, 290);
     }
+
+    // Credits String
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.font = '10px "Press Start 2P", Courier';
+    ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 20);
+    ctx.fillText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 20);
 }
 
 function draw() {
@@ -204,7 +213,6 @@ function draw() {
     
     if (currentState === 'MENU') {
         drawMenu();
-        // Draw the horse standing idly
         horse.draw(ctx);
         return;
     }
@@ -215,11 +223,11 @@ function draw() {
         
         ctx.fillStyle = '#ff4500';
         ctx.textAlign = 'center';
-        ctx.font = 'bold 40px "Courier New"';
+        ctx.font = '30px "Press Start 2P", Courier';
         ctx.fillText('TOP JOCKEYS', canvas.width / 2, 110);
         
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 24px "Courier New"';
+        ctx.font = '16px "Press Start 2P", Courier';
         if (highScores.length === 0) {
             ctx.fillText('No scores yet.', canvas.width / 2, 180);
         } else {
@@ -229,46 +237,44 @@ function draw() {
         }
         
         ctx.fillStyle = '#aaaaaa';
-        ctx.font = '16px "Courier New"';
+        ctx.font = '12px "Press Start 2P", Courier';
         ctx.fillText('Tap or Space to return', canvas.width / 2, 330);
         return;
     }
 
-    // In-Game Rendering
     collectibles.forEach(c => c.draw(ctx));
     obstacles.forEach(o => o.draw(ctx));
     horse.draw(ctx);
     
-    // UI Overlay
     ctx.fillStyle = 'white';
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 3;
-    ctx.font = 'bold 24px "Courier New"';
+    ctx.font = '16px "Press Start 2P", Courier';
     
     ctx.textAlign = 'right';
     ctx.strokeText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 40);
     ctx.fillText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 40);
     
-    ctx.fillStyle = '#32CD32'; // Apple Green
+    ctx.fillStyle = '#32CD32'; 
     ctx.strokeText(`APPLES: ${apples}`, canvas.width - 20, 70);
     ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 70);
     
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.textAlign = 'left';
-    ctx.font = 'bold 16px "Courier New"';
+    ctx.font = '10px "Press Start 2P", Courier';
     ctx.fillText('TAP/SPACE: Jump | P: Pause', 20, canvas.height - 20);
     
     if (currentState === 'PAUSED') {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = 'white';
-        ctx.font = 'bold 50px "Courier New"';
+        ctx.font = '40px "Press Start 2P", Courier';
         ctx.textAlign = 'center';
         ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
     }
 
     if (currentState === 'GAMEOVER') {
-        ctx.fillStyle = 'rgba(139, 0, 0, 0.7)'; // Dark red tint
+        ctx.fillStyle = 'rgba(139, 0, 0, 0.7)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.fillStyle = 'white';
@@ -276,16 +282,16 @@ function draw() {
         ctx.lineWidth = 4;
         ctx.textAlign = 'center';
         
-        ctx.font = 'bold 60px "Courier New"';
+        ctx.font = '50px "Press Start 2P", Courier';
         ctx.strokeText('WASTED', canvas.width / 2, canvas.height / 2 - 30);
         ctx.fillText('WASTED', canvas.width / 2, canvas.height / 2 - 30);
         
-        ctx.font = 'bold 30px "Courier New"';
+        ctx.font = '20px "Press Start 2P", Courier';
         ctx.strokeText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 30);
         ctx.fillText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 30);
         
         ctx.fillStyle = '#aaaaaa';
-        ctx.font = 'bold 18px "Courier New"';
+        ctx.font = '14px "Press Start 2P", Courier';
         ctx.fillText('Tap or Space to Menu', canvas.width / 2, canvas.height / 2 + 80);
     }
 }

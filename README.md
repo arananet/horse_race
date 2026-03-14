@@ -3,11 +3,12 @@
 A 2D pixel-art side-scrolling endless runner game playable directly in the browser! Inspired by classic arcade runners and the "Roach Race" mini-game.
 
 ## Features
-- **Retro Pixel Art Style**: Nostalgic 16-bit graphics (mountains, pine trees, clouds).
+- **Retro Pixel Art Style**: Nostalgic 16-bit graphics (mountains, pine trees, clouds) with the "Press Start 2P" arcade font.
 - **Endless Runner Mechanics**: Auto-scrolling, jumping, double-jumping to avoid fences and gaps.
 - **Collectibles**: Grab floating apples for bonus points.
 - **Leaderboard**: Local high scores saved between sessions.
 - **Browser-Native**: Built with HTML5 Canvas and Vanilla JavaScript for maximum performance (60fps) and compatibility.
+- **Mobile Responsive**: Full touch support and landscape orientation enforcement.
 - **Spec-Kit Architecture**: Developed using strict Specification-Driven Development (SDD).
 
 ## Development
@@ -17,8 +18,9 @@ This project follows the Spec-Kit methodology. See `.specify/` for project const
 To run the game, serve the `public` directory using any local web server.
 ```bash
 # Using Node.js
-npx serve public
-
-# Or using Python
-python3 -m http.server -d public
+npm install
+npm run dev
 ```
+
+### Credits
+Developed by **Eduardo Arana & Soda 🥤**
