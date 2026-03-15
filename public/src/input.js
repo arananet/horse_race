@@ -76,9 +76,10 @@ export class InputHandler {
     }
 
     consumeJump() {
-        if ((this.keys['Space'] && !this.consumed['Space']) || (this.keys['ArrowUp'] && !this.consumed['ArrowUp'])) {
+        if ((this.keys['Space'] && !this.consumed['Space']) || (this.keys['ArrowUp'] && !this.consumed['ArrowUp']) || (this.keys['Enter'] && !this.consumed['Enter'])) {
             if (this.keys['Space']) this.consumed['Space'] = true;
             if (this.keys['ArrowUp']) this.consumed['ArrowUp'] = true;
+            if (this.keys['Enter']) this.consumed['Enter'] = true;
             return true;
         }
         

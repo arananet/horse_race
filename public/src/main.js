@@ -80,17 +80,21 @@ function update(dt) {
             menuSelection = menuSelection === 0 ? 1 : 0;
             ensureAudio();
         }
-        if (input.consumeEnter()) {
-            ensureAudio();
-            if (menuSelection === 0) resetGame();
-            if (menuSelection === 1) currentState = 'HIGHSCORES';
-        }
-        const startBtn = { x: 300, y: 160, w: 200, h: 40 };
-        const scoreBtn = { x: 300, y: 210, w: 200, h: 40 };
+        // Removed consumeEnter since consumeJump now handles it
+        
+        const startBtn = { x: 200, y: 200, w: 400, h: 50 };
+        const scoreBtn = { x: 200, y: 260, w: 400, h: 50 };
         if (input.isHovering(startBtn)) menuSelection = 0;
         if (input.isHovering(scoreBtn)) menuSelection = 1;
-        if (input.consumeClick(startBtn)) { ensureAudio(); resetGame(); }
-        if (input.consumeClick(scoreBtn)) { ensureAudio(); currentState = 'HIGHSCORES'; }
+        
+        if (input.consumeClick(scoreBtn)) {
+            ensureAudio();
+            currentState = 'HIGHSCORES';
+        } else if (input.consumeClick(startBtn) || input.consumeJump()) {
+            // Mobile fallback: tapping anywhere triggers jump, which starts the game
+            ensureAudio();
+            resetGame();
+        }
         return;
     }
 
