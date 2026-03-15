@@ -127,6 +127,7 @@ function update(dt) {
             if (distance > 1000) {
                 if (r > 0.7) { type = 'bird'; SFX.eagle(); }
                 else if (r > 0.4) { type = 'hole'; }
+                else if (r > 0.2) { type = 'slime'; } // Added Slime Enemy placeholder
             } else if (distance > 500 && r > 0.7) {
                 type = 'hole';
             }
@@ -190,13 +191,17 @@ function update(dt) {
 }
 
 function drawMenu() {
+    // Menu Background Tint
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     ctx.textAlign = 'center';
     const title = 'HORSE RACE';
     ctx.font = 'bold 50px "Press Start 2P", Courier';
+
     ctx.fillStyle = '#000080';
     ctx.fillText(title, canvas.width / 2 + 5, 125);
+
     ctx.fillStyle = '#ff4500';
     ctx.lineWidth = 5;
     ctx.strokeStyle = 'white';
@@ -205,61 +210,98 @@ function drawMenu() {
     
     ctx.font = 'bold 20px "Press Start 2P", Courier';
     ctx.lineWidth = 3;
+    
     const startColor = menuSelection === 0 ? 'white' : '#ccc';
     const scoreColor = menuSelection === 1 ? 'white' : '#ccc';
+    
     ctx.fillStyle = startColor;
     ctx.strokeStyle = 'black';
     ctx.strokeText('START GAME', canvas.width / 2, 240);
     ctx.fillText('START GAME', canvas.width / 2, 240);
-    if (menuSelection === 0) { ctx.fillStyle = '#ff4500'; ctx.fillText('►', canvas.width / 2 - 120, 240); }
+    
+    if (menuSelection === 0) {
+        ctx.fillStyle = '#ff4500';
+        ctx.fillText('►', canvas.width / 2 - 120, 240);
+    }
+    
     ctx.fillStyle = scoreColor;
     ctx.strokeText('HIGH SCORES', canvas.width / 2, 290);
     ctx.fillText('HIGH SCORES', canvas.width / 2, 290);
-    if (menuSelection === 1) { ctx.fillStyle = '#ff4500'; ctx.fillText('►', canvas.width / 2 - 130, 290); }
     
+    if (menuSelection === 1) {
+        ctx.fillStyle = '#ff4500';
+        ctx.fillText('►', canvas.width / 2 - 130, 290);
+    }
+
+    // Credits shifted to the bottom center and isolated as requested
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = '12px "Press Start 2P", Courier';
-    ctx.strokeText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 30);
-    ctx.fillText('Developed by Eduardo Arana & Soda 🥤', canvas.width / 2, canvas.height - 30);
+    ctx.strokeText('Developed by Eduardo Arana and Soda 🥤', canvas.width / 2, canvas.height - 30);
+    ctx.fillText('Developed by Eduardo Arana and Soda 🥤', canvas.width / 2, canvas.height - 30);
+    
+    if (!didInitAudio) {
+        ctx.fillStyle = 'yellow';
+        ctx.font = '10px "Press Start 2P", Courier';
+        ctx.fillText('(Click anywhere to enable audio)', canvas.width / 2, 280);
+    }
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     background.draw(ctx);
-    if (currentState === 'MENU') { drawMenu(); return; }
+    
+    if (currentState === 'MENU') {
+        drawMenu();
+        return;
+    }
+
     if (currentState === 'HIGHSCORES') {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
         ctx.fillRect(100, 50, canvas.width - 200, canvas.height - 100);
+        
         ctx.fillStyle = '#ff4500';
         ctx.textAlign = 'center';
         ctx.font = '30px "Press Start 2P", Courier';
         ctx.fillText('TOP JOCKEYS', canvas.width / 2, 110);
+        
         ctx.fillStyle = 'white';
         ctx.font = '16px "Press Start 2P", Courier';
-        if (highScores.length === 0) { ctx.fillText('No scores yet.', canvas.width / 2, 180); }
-        else { highScores.forEach((s, idx) => { ctx.fillText(`${idx + 1}. ${s.toString().padStart(5, '0')}`, canvas.width / 2, 170 + (idx * 35)); }); }
+        if (highScores.length === 0) {
+            ctx.fillText('No scores yet.', canvas.width / 2, 180);
+        } else {
+            highScores.forEach((s, idx) => {
+                ctx.fillText(`${idx + 1}. ${s.toString().padStart(5, '0')}`, canvas.width / 2, 170 + (idx * 35));
+            });
+        }
+        
         ctx.fillStyle = '#aaaaaa';
         ctx.font = '12px "Press Start 2P", Courier';
         ctx.fillText('Tap or Space to return', canvas.width / 2, 330);
         return;
     }
+
     collectibles.forEach(c => c.draw(ctx));
     obstacles.forEach(o => o.draw(ctx));
     horse.draw(ctx);
+    
     ctx.fillStyle = 'white';
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 3;
     ctx.font = '16px "Press Start 2P", Courier';
+    
     ctx.textAlign = 'right';
     ctx.strokeText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 40);
     ctx.fillText(`SCORE: ${Math.floor(score).toString().padStart(5, '0')}`, canvas.width - 20, 40);
+    
     ctx.fillStyle = '#32CD32'; 
     ctx.strokeText(`APPLES: ${apples}`, canvas.width - 20, 70);
     ctx.fillText(`APPLES: ${apples}`, canvas.width - 20, 70);
+    
     ctx.fillStyle = 'white';
     ctx.textAlign = 'left';
     ctx.strokeText('LVL 1', 20, 40);
     ctx.fillText('LVL 1', 20, 40);
+    
     if (currentState === 'PAUSED') {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -268,24 +310,30 @@ function draw() {
         ctx.textAlign = 'center';
         ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
     }
+
     if (currentState === 'GAMEOVER') {
         ctx.fillStyle = 'rgba(139, 0, 0, 0.5)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 4;
         ctx.textAlign = 'center';
+        
         ctx.font = '50px "Press Start 2P", Courier';
         ctx.strokeText('WASTED', canvas.width / 2, canvas.height / 2 - 30);
         ctx.fillText('WASTED', canvas.width / 2, canvas.height / 2 - 30);
+        
         ctx.font = '20px "Press Start 2P", Courier';
         ctx.strokeText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 30);
         ctx.fillText(`Final Score: ${Math.floor(score)}`, canvas.width / 2, canvas.height / 2 + 30);
+        
         ctx.fillStyle = '#aaaaaa';
         ctx.font = '14px "Press Start 2P", Courier';
         ctx.fillText('Tap or Space to Menu', canvas.width / 2, canvas.height / 2 + 80);
     }
 }
+
 const engine = new Engine(update, draw);
 engine.start();
 console.log("Horse Race Engine Started.");
