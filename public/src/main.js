@@ -137,20 +137,46 @@ function update(dt) {
         
         obstacleTimer += dt;
         if (obstacleTimer > obstacleInterval) {
-            let type = 'fence';
+            // Mix obstacles randomly, but prevent impossible jumps (like a hole directly under a bird)
+            // by picking a single major obstacle type per spawn cycle, or occasionally grouping them safely.
             const r = Math.random();
-            if (distance > 1000) {
-                if (r > 0.7) { type = 'bird'; SFX.eagle(); }
-                else if (r > 0.4) { type = 'hole'; }
-                else if (r > 0.2) { type = 'slime'; } // Added Slime Enemy placeholder
-            } else if (distance > 500 && r > 0.7) {
-                type = 'hole';
+            let type = 'fence';
+            
+            // The further you go, the more unpredictable the mix becomes
+            if (distance > 300) {
+                if (r > 0.8) {
+                    type = 'bird';
+                    SFX.eagle();
+                } else if (r > 0.6) {
+                    type = 'hole';
+                } else if (r > 0.3) {
+                    type = 'fence';
+                } else {
+                    // 30% chance for a challenging combination: a fence immediately followed by a bird
+                    type = 'fence';
+                    setTimeout(() => {
+                        if (currentState === 'PLAYING') {
+                            const bird = new Obstacle(canvas.width, canvas.height, gameSpeed, 'bird');
+                            bird.y = GROUND_Y - bird.height - 110; // Bird swoops high enough to require precision
+                            obstacles.push(bird);
+                            SFX.eagle();
+                        }
+                    }, 500); 
+                }
+            } else {
+                // Early game: just fences to learn jumping
+                type = 'fence';
             }
+            
             const obs = new Obstacle(canvas.width, canvas.height, gameSpeed, type);
-            obs.y = type === 'hole' ? GROUND_Y : GROUND_Y - obs.height + 5;
+            // Holes render below ground, fences/birds render above
+            obs.y = type === 'hole' ? GROUND_Y : type === 'bird' ? GROUND_Y - obs.height - (Math.random() * 80 + 40) : GROUND_Y - obs.height + 5;
             obstacles.push(obs);
+            
             obstacleTimer = 0;
-            if (obstacleInterval > 700) obstacleInterval -= 15;
+            // Add slight randomness to interval so they aren't always perfectly spaced
+            const randomJitter = Math.random() * 400 - 200;
+            obstacleInterval = Math.max(700, obstacleInterval - 10) + randomJitter;
         }
 
         collectibleTimer += dt;

@@ -4,27 +4,26 @@ export class Obstacle {
         this.gameHeight = gameHeight;
         this.type = type;
         
-        this.isLoaded = false;
         this.image = new Image();
+        this.isLoaded = false;
         
         if (type === 'fence') {
             this.width = 48;
             this.height = 48;
             this.y = 300 - this.height + 5; 
             this.image.src = 'assets/fence.png';
+            this.image.onload = () => { this.isLoaded = true; };
         } else if (type === 'bird') {
             this.width = 48;
             this.height = 48;
             this.y = 300 - 150 - Math.random() * 50; 
             this.wingCycle = Math.random() * 10;
-            this.image.src = 'assets/bird.png'; // Should exist if generated
+            this.image = null; 
         } else if (type === 'hole') {
             this.width = 120;
             this.height = 100;
             this.y = 300;
         }
-        
-        this.image.onload = () => { this.isLoaded = true; };
         
         this.x = gameWidth;
         this.speed = speed;
@@ -51,7 +50,14 @@ export class Obstacle {
                 ctx.fillRect(this.x, this.y + 15, this.width, 8); 
             } else if (this.type === 'bird') {
                 ctx.fillStyle = '#1A1A1A';
-                ctx.fillRect(this.x + 10, this.y + 5, 15, 10);
+                ctx.fillRect(this.x + 10, this.y + 5, 20, 15);
+                ctx.fillRect(this.x + 5, this.y + 5, 5, 8);
+                ctx.fillRect(this.x + 30, this.y + 10, 5, 8);
+                ctx.fillStyle = '#F00';
+                ctx.fillRect(this.x + 32, this.y + 11, 3, 3);
+                ctx.fillStyle = '#1A1A1A';
+                const flap = Math.sin(this.wingCycle) > 0 ? -15 : 10;
+                ctx.fillRect(this.x + 12, this.y + 8 + flap, 15, 12);
             } else if (this.type === 'hole') {
                 ctx.fillStyle = '#000';
                 ctx.fillRect(this.x, this.y, this.width, this.height);
