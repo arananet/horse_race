@@ -76,42 +76,53 @@ function triggerGameOver() {
 function update(dt) {
     if (currentState === 'MENU') {
         background.update(1.0); 
+        
         if (input.consumeUp() || input.consumeDown()) {
             menuSelection = menuSelection === 0 ? 1 : 0;
             ensureAudio();
         }
-        // Removed consumeEnter since consumeJump now handles it
         
         const startBtn = { x: 200, y: 200, w: 400, h: 50 };
         const scoreBtn = { x: 200, y: 260, w: 400, h: 50 };
+        
         if (input.isHovering(startBtn)) menuSelection = 0;
         if (input.isHovering(scoreBtn)) menuSelection = 1;
         
+        // Using consumeJump allows hitting "Enter", "Space" or tapping screen
         if (input.consumeClick(scoreBtn)) {
             ensureAudio();
             currentState = 'HIGHSCORES';
         } else if (input.consumeClick(startBtn) || input.consumeJump()) {
-            // Mobile fallback: tapping anywhere triggers jump, which starts the game
             ensureAudio();
-            resetGame();
+            if (menuSelection === 1) {
+                currentState = 'HIGHSCORES';
+            } else {
+                resetGame();
+            }
         }
         return;
     }
 
     if (currentState === 'HIGHSCORES') {
         background.update(0.5);
-        if (input.consumeEnter() || input.consumeJump()) currentState = 'MENU';
+        if (input.consumeEnter() || input.consumeJump() || input.consumeClick({x:0, y:0, w:800, h:400})) {
+            currentState = 'MENU';
+        }
         return;
     }
 
     if (currentState === 'PAUSED') {
-        if (input.consumePause()) currentState = 'PLAYING';
+        if (input.consumePause() || input.consumeClick({x:0, y:0, w:800, h:400})) {
+            currentState = 'PLAYING';
+        }
         return;
     }
 
     if (currentState === 'GAMEOVER') {
         horse.y += horse.gravity * 2; 
-        if (input.consumeJump() || input.consumeEnter()) currentState = 'MENU';
+        if (input.consumeJump() || input.consumeEnter() || input.consumeClick({x:0, y:0, w:800, h:400})) {
+            currentState = 'MENU';
+        }
         return;
     }
 
@@ -195,7 +206,6 @@ function update(dt) {
 }
 
 function drawMenu() {
-    // Menu Background Tint
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -237,7 +247,6 @@ function drawMenu() {
         ctx.fillText('►', canvas.width / 2 - 130, 290);
     }
 
-    // Credits shifted to the bottom center and isolated as requested
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = '12px "Press Start 2P", Courier';
     ctx.strokeText('Developed by Eduardo Arana and Soda 🥤', canvas.width / 2, canvas.height - 30);
